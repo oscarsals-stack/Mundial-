@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cuotas Mundial 2026</title>
+<style>
+  :root{
+    --pitch-900:#0b1f17;
+    --pitch-800:#10291f;
+    --pitch-700:#16352a;
+    --line:#2a4438;
+    --chalk:#f3efe2;
+    --chalk-dim:#bcc4ba;
+    --gold:#e0b04f;
+    --gold-dim:#8a7038;
+    --shorten:#5fb98a;
+    --drift:#e0734f;
+    --mono:'SF Mono', ui-monospace, 'Courier New', monospace;
+    --display: 'Georgia', 'Iowan Old Style', serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; background:var(--pitch-900); color:var(--chalk); font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height:100vh;}
+  body{
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 64px);
+  }
+
+  .wrap{max-width:520px; margin:0 auto; padding:0 0 80px;}
+
+  /* Header */
+  header{
+    padding:28px 20px 20px;
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:30;
+    background:linear-gradient(180deg, var(--pitch-900) 80%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--gold-dim); margin-bottom:6px; display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--shorten); box-shadow:0 0 8px var(--shorten);}
+  h1{font-family:var(--display); font-weight:400; font-size:30px; margin:0 0 4px; letter-spacing:-0.01em;}
+  .sub{font-size:13px; color:var(--chalk-dim); line-height:1.5;}
+  .sub a{color:var(--gold); text-decoration:none; border-bottom:1px solid var(--gold-dim);}
+
+  .status-row{display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-family:var(--mono); font-size:11px; color:var(--chalk-dim);}
+  #refreshBtn{
+    background:var(--pitch-700); border:1px solid var(--line); color:var(--chalk);
+    font-family:var(--mono); font-size:11px; padding:7px 12px; border-radius:3px;
+    letter-spacing:0.06em; text-transform:uppercase;
+  }
+  #refreshBtn:active{background:var(--gold-dim); border-color:var(--gold);}
+
+  /* Setup panel */
+  .setup{margin:18px 20px; padding:18px; background:var(--pitch-800); border:1px solid var(--line); border-radius:6px;}
+  .setup h2{font-family:var(--display); font-size:17px; font-weight:400; margin:0 0 10px;}
+  .setup p{font-size:13px; color:var(--chalk-dim); line-height:1.55; margin:0 0 12px;}
+  .setup input{
+    width:100%; background:var(--pitch-900); border:1px solid var(--line); color:var(--chalk);
+    padding:11px 12px; border-radius:4px; font-family:var(--mono); font-size:13px; margin-bottom:10px;
+  }
+  .setup input:focus{outline:none; border-color:var(--gold);}
+  .setup button{
+    width:100%; background:var(--gold); color:var(--pitch-900); border:none; padding:12px;
+    border-radius:4px; font-weight:600; font-size:14px; letter-spacing:0.02em;
+  }
+  .setup button:active{background:#c79a3f;}
+  .setup .hint{font-size:11px; color:var(--gold-dim); margin-top:10px; line-height:1.5;}
+
+  /* Quota meter */
+  .quota{margin:0 20px 18px; display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:11px; color:var(--chalk-dim);}
+  .quota-bar{flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden;}
+  .quota-fill{height:100%; background:var(--gold); width:0%;}
+
+  /* Match list */
+  .section-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--gold-dim); padding:0 20px; margin:24px 0 10px;
+  }
+  .match{
+    margin:0 20px 14px; background:var(--pitch-800); border:1px solid var(--line); border-radius:6px;
+    overflow:hidden;
+  }
+  .match-head{
+    padding:14px 16px 10px; display:flex; justify-content:space-between; align-items:flex-start;
+    border-bottom:1px dashed var(--line);
+  }
+  .teams{font-family:var(--display); font-size:17px; line-height:1.3;}
+  .teams .vs{color:var(--gold-dim); font-size:13px; margin:0 6px; font-style:italic;}
+  .kickoff{font-family:var(--mono); font-size:10px; color:var(--chalk-dim); text-align:right; white-space:nowrap; padding-top:3px;}
+
+  .markets{padding:12px 16px 14px;}
+  .market-row{display:flex; gap:8px; margin-bottom:8px;}
+  .market-row:last-child{margin-bottom:0;}
+  .outcome{
+    flex:1; background:var(--pitch-900); border:1px solid var(--line); border-radius:4px;
+    padding:9px 6px; text-align:center;
+  }
+  .outcome .lbl{font-size:10px; color:var(--chalk-dim); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px;}
+  .outcome .price{font-family:var(--mono); font-size:15px; font-weight:600; color:var(--chalk);}
+  .outcome .implied{font-family:var(--mono); font-size:10px; color:var(--gold-dim); margin-top:2px;}
+  .outcome.fav{border-color:var(--gold-dim); background:rgba(224,176,79,0.06);}
+  .outcome.fav .price{color:var(--gold);}
+
+  .book-tag{font-family:var(--mono); font-size:9px; color:var(--chalk-dim); text-align:right; margin-top:8px; opacity:0.6;}
+
+  .empty, .err{margin:30px 20px; padding:20px; text-align:center; color:var(--chalk-dim); font-size:13px; line-height:1.6;}
+  .err{border:1px solid var(--drift); border-radius:6px; color:var(--drift);}
+  .err code{display:block; margin-top:8px; font-family:var(--mono); font-size:11px; color:var(--chalk-dim); word-break:break-all;}
+
+  .loading{display:flex; justify-content:center; padding:40px 0;}
+  .spin{width:18px; height:18px; border:2px solid var(--line); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  footer{padding:24px 20px 0; font-size:11px; color:var(--chalk-dim); line-height:1.6; text-align:center;}
+  footer a{color:var(--gold-dim);}
+
+  ::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow"><span class="dot"></span>Mundial 2026 · cuotas en vivo</div>
+    <h1>Línea de Mercado</h1>
+    <div class="sub">Cuotas reales vía <a href="https://the-odds-api.com" target="_blank">The Odds API</a>. 1X2 y probabilidad implícita por partido.</div>
+    <div class="status-row">
+      <span id="lastUpdate">sin actualizar</span>
+      <button id="refreshBtn">Actualizar</button>
+    </div>
+  </header>
+
+  <div id="setupPanel" class="setup" style="display:none;">
+    <h2>Conectar API</h2>
+    <p>Pega tu API key de The Odds API (gratis en the-odds-api.com, 500 requests/mes). Se guarda solo en este dispositivo, en este navegador.</p>
+    <input id="apiKeyInput" type="text" placeholder="tu-api-key-aquí" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <button id="saveKeyBtn">Guardar y cargar cuotas</button>
+    <div class="hint">La key no se envía a ningún servidor más que api.the-odds-api.com directamente desde tu teléfono.</div>
+  </div>
+
+  <div id="quotaRow" class="quota" style="display:none;">
+    <span>cuota</span>
+    <div class="quota-bar"><div class="quota-fill" id="quotaFill"></div></div>
+    <span id="quotaText">—</span>
+  </div>
+
+  <div id="content"></div>
+
+  <footer>
+    Datos: The Odds API · soccer_fifa_world_cup<br>
+    Las cuotas reflejan el mercado al momento de la consulta, no garantizan resultado.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const SPORT_KEY = 'soccer_fifa_world_cup';
+  const STORAGE_KEY = 'wc26_odds_api_key';
+  const REGIONS = 'us,uk,eu';
+  const MARKET = 'h2h';
+
+  const $content = document.getElementById('content');
+  const $setup = document.getElementById('setupPanel');
+  const $quotaRow = document.getElementById('quotaRow');
+  const $quotaFill = document.getElementById('quotaFill');
+  const $quotaText = document.getElementById('quotaText');
+  const $lastUpdate = document.getElementById('lastUpdate');
+  const $refreshBtn = document.getElementById('refreshBtn');
+  const $apiKeyInput = document.getElementById('apiKeyInput');
+  const $saveKeyBtn = document.getElementById('saveKeyBtn');
+
+  function getKey(){ return localStorage.getItem(STORAGE_KEY) || ''; }
+  function setKey(k){ localStorage.setItem(STORAGE_KEY, k); }
+
+  function americanToImplied(price){
+    // price here is decimal odds from the API (default format)
+    if(!price || price <= 1) return null;
+    return (1/price)*100;
+  }
+
+  function fmtDecimal(price){
+    return price.toFixed(2);
+  }
+
+  function fmtTime(iso){
+    try{
+      const d = new Date(iso);
+      return d.toLocaleString('es-MX', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    }catch(e){ return iso; }
+  }
+
+  function renderLoading(){
+    $content.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  }
+
+  function renderError(msg, detail){
+    $content.innerHTML = `<div class="err">${msg}${detail ? `<code>${detail}</code>` : ''}</div>`;
+  }
+
+  function renderEmpty(){
+    $content.innerHTML = '<div class="empty">No hay partidos del Mundial con cuotas activas en este momento. Las casas suelen abrir mercados 5–7 días antes de cada partido.</div>';
+  }
+
+  function bestOutcomePrice(bookmakers, teamName){
+    // pick the best (highest) decimal price across books for this outcome
+    let best = null, bookUsed = '';
+    for(const bk of bookmakers){
+      const m = bk.markets && bk.markets.find(m => m.key === 'h2h');
+      if(!m) continue;
+      const o = m.outcomes.find(o => o.name === teamName);
+      if(o && (best === null || o.price > best)){
+        best = o.price;
+        bookUsed = bk.title;
+      }
+    }
+    return { price: best, book: bookUsed };
+  }
+
+  function renderMatches(events){
+    if(!events || events.length === 0){ renderEmpty(); return; }
+
+    // sort by commence_time ascending
+    events.sort((a,b) => new Date(a.commence_time) - new Date(b.commence_time));
+
+    let html = '<div class="section-label">Próximos partidos</div>';
+
+    events.forEach(ev => {
+      const home = ev.home_team;
+      const away = ev.away_team;
+      const books = ev.bookmakers || [];
+
+      if(books.length === 0) return;
+
+      const homeOdds = bestOutcomePrice(books, home);
+      const awayOdds = bestOutcomePrice(books, away);
+      const drawOdds = bestOutcomePrice(books, 'Draw');
+
+      const prices = [homeOdds.price, drawOdds.price, awayOdds.price].filter(p => p);
+      const minPrice = prices.length ? Math.min(...prices) : null;
+
+      function outcomeCell(label, odds){
+        if(!odds.price) return `<div class="outcome"><div class="lbl">${label}</div><div class="price">—</div></div>`;
+        const isFav = odds.price === minPrice;
+        const implied = americanToImplied(odds.price);
+        return `<div class="outcome ${isFav ? 'fav' : ''}">
+          <div class="lbl">${label}</div>
+          <div class="price">${fmtDecimal(odds.price)}</div>
+          <div class="implied">${implied.toFixed(0)}%</div>
+        </div>`;
+      }
+
+      html += `<div class="match">
+        <div class="match-head">
+          <div class="teams">${home}<span class="vs">vs</span>${away}</div>
+          <div class="kickoff">${fmtTime(ev.commence_time)}</div>
+        </div>
+        <div class="markets">
+          <div class="market-row">
+            ${outcomeCell(home, homeOdds)}
+            ${outcomeCell('Empate', drawOdds)}
+            ${outcomeCell(away, awayOdds)}
+          </div>
+          <div class="book-tag">mejor precio: ${homeOdds.book || awayOdds.book || drawOdds.book || '—'} · ${books.length} casas comparadas</div>
+        </div>
+      </div>`;
+    });
+
+    $content.innerHTML = html;
+  }
+
+  async function loadOdds(){
+    const key = getKey();
+    if(!key){
+      $setup.style.display = 'block';
+      $quotaRow.style.display = 'none';
+      $content.innerHTML = '';
+      return;
+    }
+    $setup.style.display = 'none';
+    $quotaRow.style.display = 'flex';
+    renderLoading();
+
+    const url = `https://api.the-odds-api.com/v4/sports/${SPORT_KEY}/odds/?apiKey=${encodeURIComponent(key)}&regions=${REGIONS}&markets=${MARKET}&oddsFormat=decimal`;
+
+    try{
+      const res = await fetch(url);
+
+      const remaining = res.headers.get('x-requests-remaining');
+      const used = res.headers.get('x-requests-used');
+      if(remaining !== null){
+        const total = (parseInt(remaining)||0) + (parseInt(used)||0);
+        const pct = total > 0 ? (parseInt(used)/total)*100 : 0;
+        $quotaFill.style.width = pct + '%';
+        $quotaText.textContent = `${used || 0} usadas / ${remaining || '—'} restantes`;
+      }
+
+      if(!res.ok){
+        const text = await res.text();
+        if(res.status === 401){
+          renderError('Tu API key no es válida o expiró. Revisa que la copiaste completa desde the-odds-api.com.', text);
+        } else if(res.status === 429){
+          renderError('Llegaste al límite de tu plan gratis (500 requests/mes). Espera al siguiente ciclo o actualiza tu plan.', text);
+        } else {
+          renderError('The Odds API devolvió un error.', text);
+        }
+        return;
+      }
+
+      const data = await res.json();
+      renderMatches(data);
+      $lastUpdate.textContent = 'actualizado ' + new Date().toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'});
+
+    }catch(err){
+      renderError('No se pudo conectar a The Odds API. Revisa tu conexión a internet.', err.message);
+    }
+  }
+
+  $saveKeyBtn.addEventListener('click', () => {
+    const v = $apiKeyInput.value.trim();
+    if(!v) return;
+    setKey(v);
+    loadOdds();
+  });
+
+  $refreshBtn.addEventListener('click', loadOdds);
+
+  // prefill from storage if present, else show setup
+  const existing = getKey();
+  if(existing){ $apiKeyInput.value = existing; }
+  loadOdds();
+
+})();
+</script>
+
+</body>
+</html>
